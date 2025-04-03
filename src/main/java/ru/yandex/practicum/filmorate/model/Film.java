@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class Film {
     private Long id;
-    @NonNull
     private String name;
     private String description;
     private LocalDate releaseDate;
