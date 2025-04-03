@@ -52,7 +52,7 @@ public class UserController {
             return oldUser;
         }
         log.warn("пользователь c ID: {} не найден", newUser.getId());
-        throw new NotFoundException("Фильм с id = " + newUser.getId() +" не найден");
+        throw new NotFoundException("Фильм с id = " + newUser.getId() + " не найден");
     }
 
     private long getNextId() {
@@ -73,7 +73,7 @@ public class UserController {
             log.warn("вместо имени будет использоваться логин");
             user.setName(user.getLogin());
         }
-        if (user.getBirthday()!=null && user.getBirthday().isAfter(LocalDate.now())) {
+        if (user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now())) {
             log.warn("дата рождения не может быть в будущем");
             throw new ValidationException("дата рождения не может быть в будущем");
         }
