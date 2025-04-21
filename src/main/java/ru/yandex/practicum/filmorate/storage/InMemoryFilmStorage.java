@@ -57,6 +57,14 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.values();
     }
 
+    @Override
+    public Film getFilmById(Long id) {
+        if (!films.containsKey(id)) {
+            throw new NotFoundException(String.format("Нет фильма с id %d", id));
+        }
+        return films.get(id);
+    }
+
     private void isFilmValid(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.warn("название не может быть пустым");

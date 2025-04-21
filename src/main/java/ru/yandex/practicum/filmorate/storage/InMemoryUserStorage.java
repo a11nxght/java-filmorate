@@ -23,6 +23,13 @@ public class InMemoryUserStorage implements UserStorage {
         return users.values();
     }
 
+    public User getUserById(Long id) {
+        if (!users.containsKey(id)) {
+            throw new NotFoundException(String.format("Нет пользователя с id %d", id));
+        }
+        return users.get(id);
+    }
+
     @Override
     public User create(User user) {
         isUserValid(user);

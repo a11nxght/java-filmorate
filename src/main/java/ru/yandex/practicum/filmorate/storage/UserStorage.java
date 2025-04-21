@@ -12,4 +12,6 @@ public interface UserStorage {
     public User delete(User user);
 
     public Collection<User> getAll();
+
+    public User getUserById(Long id);
 }

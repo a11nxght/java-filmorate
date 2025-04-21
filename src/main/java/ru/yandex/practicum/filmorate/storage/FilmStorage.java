@@ -12,4 +12,6 @@ public interface FilmStorage {
     public Film delete(Film film);
 
     public Collection<Film> getAll();
+
+    public Film getFilmById(Long id);
 }
