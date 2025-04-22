@@ -2,15 +2,14 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -18,14 +17,17 @@ import java.util.Map;
 public class FilmController {
 
     private final FilmStorage filmStorage;
+    private final FilmService filmService;
 
     @Autowired
-    public FilmController(InMemoryFilmStorage inMemoryFilmStorage) {
+    public FilmController(InMemoryFilmStorage inMemoryFilmStorage, FilmService filmService) {
         this.filmStorage = inMemoryFilmStorage;
+        this.filmService = filmService;
     }
 
     @GetMapping
     public Collection<Film> getAll() {
+        log.info("Поступил запрос на вывод всех фильмов");
         return filmStorage.getAll();
     }
 
@@ -43,5 +45,29 @@ public class FilmController {
         Film updatedFilm = filmStorage.update(newFilm);
         log.info("Обновлен фильм с ID: {}", updatedFilm.getId());
         return updatedFilm;
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable Long id) {
+        log.info("Поступил запрос на вывод фильма по id");
+        return filmStorage.getFilmById(id);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Поступил запрос добавление лайка");
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/films/{id}/like/{userId}")
+    public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Поступил запрос удаление лайка");
+        filmService.deleteLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public Collection<Film> getTopFilms(@RequestParam(defaultValue = "10") String count) {
+        log.info("Поступил запрос на вывод популярных фильмов");
+        return filmService.getTopFilms(count);
     }
 }

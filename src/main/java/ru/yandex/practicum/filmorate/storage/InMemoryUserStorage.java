@@ -56,7 +56,7 @@ public class InMemoryUserStorage implements UserStorage {
             return oldUser;
         }
         log.warn("пользователь c ID: {} не найден", newUser.getId());
-        throw new NotFoundException("Фильм с id = " + newUser.getId() + " не найден");
+        throw new NotFoundException("пользователь с id = " + newUser.getId() + " не найден");
     }
 
     @Override
