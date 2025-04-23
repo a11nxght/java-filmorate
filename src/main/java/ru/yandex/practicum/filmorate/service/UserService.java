@@ -21,57 +21,57 @@ public class UserService {
 
     public void addFriend(Long userId, Long friendId) {
         User user = userStorage.getUserById(userId);
-        if (Objects.isNull(user.getUser_friends())) {
-            user.setUser_friends(new HashSet<>());
+        if (Objects.isNull(user.getUserFriends())) {
+            user.setUserFriends(new HashSet<>());
         }
-        if (user.getUser_friends().contains(friendId)) {
+        if (user.getUserFriends().contains(friendId)) {
             return;
         }
         User friend = userStorage.getUserById(friendId);
-        if (Objects.isNull(friend.getUser_friends())) {
-            friend.setUser_friends(new HashSet<Long>());
+        if (Objects.isNull(friend.getUserFriends())) {
+            friend.setUserFriends(new HashSet<Long>());
         }
 
-        user.getUser_friends().add(friendId);
-        friend.getUser_friends().add(userId);
+        user.getUserFriends().add(friendId);
+        friend.getUserFriends().add(userId);
     }
 
     public void deleteFriend(Long userId, Long friendId) {
         User user = userStorage.getUserById(userId);
-        if (Objects.isNull(user.getUser_friends())) {
-            user.setUser_friends(new HashSet<>());
+        if (Objects.isNull(user.getUserFriends())) {
+            user.setUserFriends(new HashSet<>());
             return;
         }
-        if (!user.getUser_friends().contains(friendId)) {
+        if (!user.getUserFriends().contains(friendId)) {
             throw new NotFoundException("Has error response");
         }
         User friend = userStorage.getUserById(friendId);
-        if (Objects.isNull(friend.getUser_friends())) {
-            friend.setUser_friends(new HashSet<Long>());
+        if (Objects.isNull(friend.getUserFriends())) {
+            friend.setUserFriends(new HashSet<Long>());
         }
-        user.getUser_friends().remove(friendId);
-        friend.getUser_friends().remove(userId);
+        user.getUserFriends().remove(friendId);
+        friend.getUserFriends().remove(userId);
     }
 
     public Collection<User> getFriends(Long userId) {
         User user = userStorage.getUserById(userId);
-        if (Objects.isNull(user.getUser_friends())) {
+        if (Objects.isNull(user.getUserFriends())) {
             return new ArrayList<>();
         }
-        return user.getUser_friends().stream().map(userStorage::getUserById).toList();
+        return user.getUserFriends().stream().map(userStorage::getUserById).toList();
     }
 
     public Collection<User> getCommonFriends(Long userId, Long friendId) {
         User user = userStorage.getUserById(userId);
-        if (Objects.isNull(user.getUser_friends())) {
+        if (Objects.isNull(user.getUserFriends())) {
             return new ArrayList<>();
         }
         User friend = userStorage.getUserById(friendId);
-        if (Objects.isNull(friend.getUser_friends())) {
+        if (Objects.isNull(friend.getUserFriends())) {
             return new ArrayList<>();
         }
-        return user.getUser_friends().stream()
-                .filter(u -> friend.getUser_friends().contains(u))
+        return user.getUserFriends().stream()
+                .filter(u -> friend.getUserFriends().contains(u))
                 .map(userStorage::getUserById)
                 .toList();
     }
