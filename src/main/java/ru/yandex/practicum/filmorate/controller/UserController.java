@@ -27,7 +27,7 @@ public class UserController {
 
     @GetMapping
     public Collection<User> getAll() {
-        log.info("Поступил запрос на вывод пользователя");
+        log.info("Поступил запрос на вывод всех пользователей");
         return userStorage.getAll();
     }
 
@@ -50,31 +50,31 @@ public class UserController {
 
     @GetMapping("/{id}")
     public User getUserById(@PathVariable Long id) {
-        log.info("Поступил запрос на вывод пользователя по id");
+        log.info("Поступил запрос на вывод пользователя с id: {}", id);
         return userStorage.getUserById(id);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        log.info("Поступил запрос на добавление друга");
+        log.info("Поступил запрос пользователя с ID: {} на добавление друга с ID: {}", id, friendId);
         userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        log.info("Поступил удаление друга");
+        log.info("Поступил запрос пользователя с ID: {} на удаление другас ID: {}", id, friendId);
         userService.deleteFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")
     public Collection<User> getFriends(@PathVariable Long id) {
-        log.info("Поступил запрос на вывод друзей пользователя");
+        log.info("Поступил запрос на вывод друзей пользователя с ID: {}", id);
         return userService.getFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
-        log.info("Поступил запрос на вывод общих друзей");
+        log.info("Поступил запрос на вывод общих друзей у пользователей с ID: {}, {}", id, otherId);
         return userService.getCommonFriends(id, otherId);
     }
 }

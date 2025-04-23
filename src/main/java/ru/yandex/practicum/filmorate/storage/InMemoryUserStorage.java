@@ -67,11 +67,11 @@ public class InMemoryUserStorage implements UserStorage {
     private void isUserValid(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
             log.warn("электронная почта не может быть пустой и должна содержать символ @");
-            throw new ValidationException("электронная почта не может быть пустой и должна содержать символ @");
+            throw new ValidationException("Has error response");
         }
         if (user.getLogin() == null || user.getLogin().isBlank()) {
             log.warn("логин не может быть пустым и содержать пробелы");
-            throw new ValidationException("логин не может быть пустым и содержать пробелы");
+            throw new ValidationException("Has error response");
         }
         if (user.getName() == null || user.getName().isBlank()) {
             log.warn("вместо имени будет использоваться логин");
@@ -79,7 +79,7 @@ public class InMemoryUserStorage implements UserStorage {
         }
         if (user.getBirthday() != null && user.getBirthday().isAfter(LocalDate.now())) {
             log.warn("дата рождения не может быть в будущем");
-            throw new ValidationException("дата рождения не может быть в будущем");
+            throw new ValidationException("Has error response");
         }
     }
 

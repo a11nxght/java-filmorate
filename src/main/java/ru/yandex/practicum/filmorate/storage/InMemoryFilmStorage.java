@@ -68,19 +68,19 @@ public class InMemoryFilmStorage implements FilmStorage {
     private void isFilmValid(Film film) {
         if (film.getName() == null || film.getName().isBlank()) {
             log.warn("название не может быть пустым");
-            throw new ValidationException("название не может быть пустым");
+            throw new ValidationException("Has error response");
         }
         if (film.getDescription() != null && film.getDescription().length() > 200) {
             log.warn("максимальная длина описания — 200 символов");
-            throw new ValidationException("максимальная длина описания — 200 символов");
+            throw new ValidationException("Has error response");
         }
         if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             log.warn("дата релиза — не раньше 28 декабря 1895 года");
-            throw new ValidationException("дата релиза — не раньше 28 декабря 1895 года");
+            throw new ValidationException("Has error response");
         }
         if (film.getDuration() <= 0) {
             log.warn("продолжительность фильма должна быть положительным числом.");
-            throw new ValidationException("продолжительность фильма должна быть положительным числом.");
+            throw new ValidationException("Has error response");
         }
     }
 

@@ -49,25 +49,26 @@ public class FilmController {
 
     @GetMapping("/{id}")
     public Film getFilmById(@PathVariable Long id) {
-        log.info("Поступил запрос на вывод фильма по id");
+        log.info("Поступил запрос на вывод фильма c id: {}", id);
         return filmStorage.getFilmById(id);
     }
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Поступил запрос добавление лайка");
+        log.info("Поступил запрос добавление лайка фильму с ID: {}, от пользователя с ID: {}", id, userId
+        );
         filmService.addLike(id, userId);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
+    @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable Long id, @PathVariable Long userId) {
-        log.info("Поступил запрос удаление лайка");
+        log.info("Поступил запрос удаление лайка у фильма с ID: {} от пользовалеля с ID: {}", id, userId);
         filmService.deleteLike(id, userId);
     }
 
     @GetMapping("/popular")
     public Collection<Film> getTopFilms(@RequestParam(defaultValue = "10") String count) {
-        log.info("Поступил запрос на вывод популярных фильмов");
+        log.info("Поступил запрос на вывод {} популярных фильмов", count);
         return filmService.getTopFilms(count);
     }
 }
