@@ -22,9 +22,9 @@ public class FilmService {
     private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage inMemoryFilmStorage, InMemoryUserStorage InMemoryUserStorage) {
+    public FilmService(InMemoryFilmStorage inMemoryFilmStorage, InMemoryUserStorage inMemoryUserStorage) {
         this.filmStorage = inMemoryFilmStorage;
-        this.userStorage = InMemoryUserStorage;
+        this.userStorage = inMemoryUserStorage;
     }
 
     public void addLike(Long filmId, Long userId) {
