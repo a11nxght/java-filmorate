@@ -18,16 +18,19 @@ class UserControllerTest {
         UserService userService = new UserService(inMemoryUserStorage);
         UserController userController = new UserController(inMemoryUserStorage, userService);
         assertThrows(ValidationException.class, () -> {
-            User user = new User(null, null, null, null, null, null);
+            User user = new User();
             userController.create(user);
         }, "Должно выводиться исключение валидации");
         assertThrows(ValidationException.class, () -> {
-            User user = new User(null, "asdfadf@sadfas", null, null, null, null);
+            User user = new User();
+            user.setEmail("asdfadf@sadfas");
             userController.create(user);
         }, "Должно выводиться исключение валидации");
         assertThrows(ValidationException.class, () -> {
-            User user = new User(null, "asdfadf@sadfas", "sdfas", null,
-                    LocalDate.of(2030, 1, 1), null);
+            User user = new User();
+            user.setEmail("asdfadf@sadfas");
+            user.setLogin("sdfas");
+            user.setBirthday(LocalDate.of(2030, 1, 1));
             userController.create(user);
         }, "Должно выводиться исключение валидации");
     }

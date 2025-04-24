@@ -19,24 +19,31 @@ class FilmControllerTest {
         FilmService filmService = new FilmService(inMemoryFilmStorage, inMemoryUserStorage);
         FilmController filmController = new FilmController(inMemoryFilmStorage, filmService);
         assertThrows(ValidationException.class, () -> {
-            Film film = new Film(null, null, null, null, 0, null);
+            Film film = new Film();
             filmController.create(film);
         }, "Должно выводиться исключение валидации");
         assertThrows(ValidationException.class, () -> {
-            Film film = new Film(null, "terminator", "Пятеро друзей ( комик-группа «Шарло»), " +
+            Film film = new Film();
+            film.setName("terminator");
+            film.setDescription("Пятеро друзей ( комик-группа «Шарло»), " +
                     "приезжают в город Бризуль. Здесь они хотят разыскать господина Огюста Куглова, который задолжал " +
                     "им деньги, а именно 20 миллионов. о Куглов, который за время «своего отсутствия», стал " +
-                    "кандидатом Коломбани.", null, 0, null);
+                    "кандидатом Коломбани.");
             filmController.create(film);
         }, "Должно выводиться исключение валидации");
         assertThrows(ValidationException.class, () -> {
-            Film film = new Film(null, "terminator", "terminator",
-                    LocalDate.of(1894, 1, 1), 0, null);
+            Film film = new Film();
+            film.setName("terminator");
+            film.setDescription("terminator");
+            film.setReleaseDate(LocalDate.of(1894, 1, 1));
             filmController.create(film);
         }, "Должно выводиться исключение валидации");
         assertThrows(ValidationException.class, () -> {
-            Film film = new Film(null, "terminator", "terminator",
-                    LocalDate.of(1994, 1, 1), 0, null);
+            Film film = new Film();
+            film.setName("terminator");
+            film.setDescription("terminator");
+            film.setReleaseDate(LocalDate.of(1994, 1, 1));
+            film.setDuration(0);
             filmController.create(film);
         }, "Должно выводиться исключение валидации");
     }
