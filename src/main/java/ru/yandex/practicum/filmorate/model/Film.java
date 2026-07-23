@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.model;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -18,5 +20,7 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private int duration;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private final Set<Long> likes = new HashSet<>();
 }

@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
@@ -25,14 +26,16 @@ public class FilmServiceImpl implements FilmService {
     public Film add(Film film) {
         validateFilmDate(film);
         validateFilmDuration(film);
+        log.info("Adding film: {}", film);
         return filmStorage.add(film);
     }
 
     @Override
     public Film update(Film film) {
-        filmStorage.get(film.getId()).orElseThrow(() -> new ValidationException("Film not found"));
+        filmStorage.get(film.getId()).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
         validateFilmDate(film);
         validateFilmDuration(film);
+        log.info("Updating film: {}", film);
         return filmStorage.update(film);
     }
 
@@ -43,7 +46,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film findById(long id) {
-        return filmStorage.get(id).orElseThrow(() -> new ValidationException("Film not found"));
+        return filmStorage.get(id).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
     }
 
     @Override
@@ -55,24 +58,25 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public void addLike(long filmId, long userId) {
-        Film film = filmStorage.get(filmId).orElseThrow(() -> new ValidationException("Film not found"));
-        User user = userStorage.get(userId).orElseThrow(() -> new ValidationException("User not found"));
+        Film film = filmStorage.get(filmId).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
+        User user = userStorage.get(userId).orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден."));
         film.getLikes().add(user.getId());
     }
 
     @Override
     public void removeLike(long filmId, long userId) {
-        Film film = filmStorage.get(filmId).orElseThrow(() -> new ValidationException("Film not found"));
-        User user = userStorage.get(userId).orElseThrow(() -> new ValidationException("User not found"));
+        Film film = filmStorage.get(filmId).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
+        User user = userStorage.get(userId).orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден."));
         film.getLikes().remove(user.getId());
     }
 
     @Override
     public List<Film> getPopular(int count) {
         return filmStorage.getAll().stream()
+                .filter(film -> !film.getLikes().isEmpty())
                 .sorted(Comparator.comparing(film -> film.getLikes().size()))
                 .limit(count)
-                .toList();
+                .toList().reversed();
     }
 
     private void validateFilmDate(Film film) throws ValidationException {
