@@ -4,21 +4,24 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-@Builder
 public class User {
-    long id;
+    private long id;
     @Email(message = "Неверный формат email.")
-    String email;
+    private String email;
     @NotBlank(message = "Логин не может быть пустым.")
-    @Pattern(regexp = "^\\S+$", message = "Логин не должен содержать пробелы.")
-    String login;
-    String name;
+    @Pattern(regexp = "^\\S*$", message = "Логин не должен содержать пробелы.")
+    private String login;
+    private String name;
     @PastOrPresent(message = "Дата рождения не может быть в будущем.")
-    LocalDate birthday;
+    private LocalDate birthday;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private final Set<Long> friends = new HashSet<>();
 }
