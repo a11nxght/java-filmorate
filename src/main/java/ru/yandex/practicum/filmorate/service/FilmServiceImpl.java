@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -17,6 +19,7 @@ import java.util.List;
 public class FilmServiceImpl implements FilmService {
 
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Override
     public Film add(Film film) {
@@ -47,6 +50,28 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> findAll() {
         return filmStorage.getAll().stream()
                 .sorted(Comparator.comparing(Film::getId))
+                .toList();
+    }
+
+    @Override
+    public void addLike(long filmId, long userId) {
+        Film film = filmStorage.get(filmId).orElseThrow(() -> new ValidationException("Film not found"));
+        User user = userStorage.get(userId).orElseThrow(() -> new ValidationException("User not found"));
+        film.getLikes().add(user.getId());
+    }
+
+    @Override
+    public void removeLike(long filmId, long userId) {
+        Film film = filmStorage.get(filmId).orElseThrow(() -> new ValidationException("Film not found"));
+        User user = userStorage.get(userId).orElseThrow(() -> new ValidationException("User not found"));
+        film.getLikes().remove(user.getId());
+    }
+
+    @Override
+    public List<Film> getPopular(int count) {
+        return filmStorage.getAll().stream()
+                .sorted(Comparator.comparing(film -> film.getLikes().size()))
+                .limit(count)
                 .toList();
     }
 
