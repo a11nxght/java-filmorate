@@ -2,12 +2,9 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -17,7 +14,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
 
     @Override
-    public Film addFilm(Film film) {
+    public Film add(Film film) {
         film.setId(getNextId());
         films.put(film.getId(), film);
         log.info("Film added: {}", film);
@@ -25,28 +22,25 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilm(Film film) {
-        films.remove(film.getId());
+    public void delete(long id) {
+        films.remove(id);
     }
 
     @Override
-    public Film updateFilm(Film film) {
-        if (!films.containsKey(film.getId())) {
-            throw new NotFoundException("Film with id " + film.getId() + " not found");
-        }
+    public Film update(Film film) {
         films.put(film.getId(), film);
         log.info("Film updated: {}", film);
         return film;
     }
 
     @Override
-    public Film getFilm(long id) {
-        return films.get(id);
+    public Optional<Film> get(long id) {
+        return Optional.ofNullable(films.get(id));
     }
 
     @Override
-    public List<Film> getFilms() {
-        return films.values().stream().toList();
+    public Collection<Film> getAll() {
+        return films.values();
     }
 
     private long getNextId() {

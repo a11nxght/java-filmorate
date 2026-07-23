@@ -2,17 +2,18 @@ package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Optional;
 
 public interface FilmStorage {
 
-    Film addFilm(Film film);
+    Film add(Film film);
 
-    void deleteFilm(Film film);
+    void delete(long id);
 
-    Film updateFilm(Film film);
+    Film update(Film film);
 
-    Film getFilm(long id);
+    Optional<Film> get(long id);
 
-    List<Film> getFilms();
+    Collection<Film> getAll();
 }
