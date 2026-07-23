@@ -55,4 +55,33 @@ public class UserServiceImpl implements UserService {
                 .sorted(Comparator.comparing(User::getId))
                 .toList();
     }
+
+    @Override
+    public void addFriend(long userId, long friendId) {
+        User user = userStorage.get(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
+        User friend = userStorage.get(friendId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " не найден."));
+        user.getFriends().add(friendId);
+        friend.getFriends().add(userId);
+    }
+
+    @Override
+    public void removeFriend(long userId, long friendId) {
+        User user = userStorage.get(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
+        User friend = userStorage.get(friendId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " не найден."));
+        user.getFriends().remove(friendId);
+        friend.getFriends().remove(userId);
+    }
+
+    @Override
+    public List<User> findFriends(long userId) {
+        User user = userStorage.get(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
+        return userStorage.getAll().stream()
+                .filter(u -> user.getFriends().contains(u.getId()))
+                .toList();
+    }
 }

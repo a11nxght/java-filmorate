@@ -15,4 +15,10 @@ public interface UserService {
     User findById(long id);
 
     List<User> findAll();
+
+    void addFriend(long userId, long friendId);
+
+    void removeFriend(long userId, long friendId);
+
+    List<User> findFriends(long userId);
 }
