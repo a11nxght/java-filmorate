@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -29,5 +30,25 @@ public class UserController {
     @GetMapping
     public Collection<User> getAll() {
         return userService.findAll();
+    }
+
+    @PutMapping("{id}/friends/{friendId}")
+    public void addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("{id}/friends")
+    public List<User> getFriends(@PathVariable Integer id) {
+        return userService.findFriends(id);
+    }
+
+    @GetMapping("{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.findCommonFriends(id, otherId);
     }
 }

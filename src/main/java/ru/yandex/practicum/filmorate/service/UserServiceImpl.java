@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -82,6 +84,19 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         return userStorage.getAll().stream()
                 .filter(u -> user.getFriends().contains(u.getId()))
+                .toList();
+    }
+
+    @Override
+    public List<User> findCommonFriends(long userId, long friendId) {
+        User user = userStorage.get(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
+        User friend = userStorage.get(friendId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " не найден."));
+        return user.getFriends().stream()
+                .filter(id -> friend.getFriends().contains(id))
+                .map(id -> userStorage.get(id)
+                            .orElseThrow(() -> new NotFoundException("Пользователь с id: " + id + " не найден.")))
                 .toList();
     }
 }
