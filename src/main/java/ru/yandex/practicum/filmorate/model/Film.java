@@ -23,4 +23,6 @@ public class Film {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private final Set<Long> likes = new HashSet<>();
+    private Genre genre;
+    private MPA mpa;
 }
