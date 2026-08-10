@@ -62,8 +62,8 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         User friend = userStorage.get(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " не найден."));
-        user.getFriends().add(friendId);
-        friend.getFriends().add(userId);
+//        user.getFriends().add(friendId);
+//        friend.getFriends().add(userId);
     }
 
     @Override
@@ -72,8 +72,8 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         User friend = userStorage.get(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " не найден."));
-        user.getFriends().remove(friendId);
-        friend.getFriends().remove(userId);
+//        user.getFriends().remove(friendId);
+//        friend.getFriends().remove(userId);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
         User user = userStorage.get(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         return userStorage.getAll().stream()
-                .filter(u -> user.getFriends().contains(u.getId()))
+//                .filter(u -> user.getFriends().contains(u.getId()))
                 .toList();
     }
 
@@ -91,10 +91,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         User friend = userStorage.get(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " не найден."));
-        return user.getFriends().stream()
-                .filter(id -> friend.getFriends().contains(id))
-                .map(id -> userStorage.get(id)
-                            .orElseThrow(() -> new NotFoundException("Пользователь с id: " + id + " не найден.")))
-                .toList();
+//        return user.getFriends().stream()
+//                .filter(id -> friend.getFriends().contains(id))
+//                .map(id -> userStorage.get(id)
+//                            .orElseThrow(() -> new NotFoundException("Пользователь с id: " + id + " не найден.")))
+//                .toList();
+        return null;
     }
 }
