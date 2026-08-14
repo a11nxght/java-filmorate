@@ -2,9 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -12,6 +10,9 @@ import java.util.Set;
 
 
 @Data
+@Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class Film {
     private long id;
     @NotBlank(message = "Имя не должно быть пустым.")

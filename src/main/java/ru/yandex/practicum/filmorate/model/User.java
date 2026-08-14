@@ -9,6 +9,9 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Data
+@Builder(toBuilder = true)
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
     private long id;
     @Email(message = "Неверный формат email.")
