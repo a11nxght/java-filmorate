@@ -47,6 +47,11 @@ public class InMemoryFilmStorage implements FilmStorage {
         return List.of();
     }
 
+    @Override
+    public void setFilmGenres(Film film) {
+
+    }
+
     private long getNextId() {
         return films.keySet().stream()
                 .mapToLong(id -> id)

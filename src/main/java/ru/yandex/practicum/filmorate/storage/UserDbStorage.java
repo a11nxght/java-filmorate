@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository("UserDbStorage")
-public class UserDbStorage extends BaseRepository<User> implements UserStorage{
+public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     private static final String INSERT_QUERY = """
             INSERT INTO users (email, login, name, birthday)
@@ -17,47 +17,47 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage{
             """;
 
     private static final String DELETE_QUERY = """
-            DELETE FROM users WHERE id = ?;
-    """;
+                    DELETE FROM users WHERE id = ?;
+            """;
 
     private static final String UPDATE_QUERY = """
-            UPDATE users
-            SET email = ?,
-                login = ?,
-                name = ?,
-                birthday = ?
-            WHERE id = ?;
-    """;
+                    UPDATE users
+                    SET email = ?,
+                        login = ?,
+                        name = ?,
+                        birthday = ?
+                    WHERE id = ?;
+            """;
 
     private static final String FIND_BY_ID_QUERY = """
-            SELECT * FROM users WHERE id = ?;
-    """;
+                    SELECT * FROM users WHERE id = ?;
+            """;
 
     private static final String FIND_ALL_QUERY = """
-            SELECT * FROM users;
-    """;
+                    SELECT * FROM users;
+            """;
 
     private static final String FIND_FRIENDS_QUERY = """
             SELECT *
-            FROM users u
-            JOIN friends f  ON u.id = f.user_id
-            WHERE f.friend_id = ?;
+            FROM users
+            WHERE id IN
+                (SELECT friend_id
+                 FROM friends
+                 WHERE user_id = ?);
             """;
 
     private static final String FIND_COMMON_FRIENDS_QUERY = """
-            SELECT *
-            FROM users
-            WHERE id IN
-                (SELECT u.id
-                 FROM users u
-                 JOIN friends f ON u.id = f.friend_id
-                 WHERE f.user_id = ?)
-              AND id IN
-                (SELECT u.id
-                 FROM users u
-                 JOIN friends f ON u.id = f.user_id
-                 WHERE f.friend_id = ?);
-    """;
+                    SELECT *
+                    FROM users
+                    WHERE id IN
+                        (SELECT friend_id
+                         FROM friends
+                         WHERE user_id = ?)
+                      AND id IN
+                        (SELECT friend_id
+                         FROM friends
+                         WHERE user_id = ?);
+            """;
 
     public UserDbStorage(final JdbcTemplate jdbcTemplate, RowMapper<User> rowMapper) {
         super(jdbcTemplate, rowMapper);

@@ -18,4 +18,6 @@ public interface FilmStorage {
     List<Film> findAll();
 
     List<Film> findPopular(int count);
+
+    void setFilmGenres(Film film);
 }

@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 
@@ -24,6 +25,8 @@ public class Film {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private final Set<Long> likes = new HashSet<>();
-    private Genre genre;
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private MPA mpa;
 }

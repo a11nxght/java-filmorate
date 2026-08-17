@@ -6,9 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.LikesStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,19 +18,24 @@ public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final LikesStorage likesStorage;
+    private final GenreStorage genreStorage;
+    private final MPAStorage mpaStorage;
 
     public FilmServiceImpl(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
                            @Qualifier("UserDbStorage") UserStorage userStorage,
-                           LikesStorage likesStorage) {
+                           LikesStorage likesStorage,
+                           GenreStorage genreStorage,
+                           MPAStorage mpaStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.likesStorage = likesStorage;
+        this.genreStorage = genreStorage;
+        this.mpaStorage = mpaStorage;
     }
 
     @Override
     public Film add(Film film) {
-        validateFilmDate(film);
-        validateFilmDuration(film);
+        validateFilm(film);
         log.info("Adding film: {}", film);
         return filmStorage.save(film);
     }
@@ -40,8 +43,7 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public Film update(Film film) {
         filmStorage.findById(film.getId()).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
-        validateFilmDate(film);
-        validateFilmDuration(film);
+        validateFilm(film);
         log.info("Updating film: {}", film);
         return filmStorage.update(film);
     }
@@ -53,7 +55,9 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film findById(long id) {
-        return filmStorage.findById(id).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
+        Film film = filmStorage.findById(id).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
+        filmStorage.setFilmGenres(film);
+        return film;
     }
 
     @Override
@@ -92,5 +96,26 @@ public class FilmServiceImpl implements FilmService {
             log.debug("Film duration: {} is not valid", film.getDuration());
             throw new ValidationException("Продолжительность фильма должна быть положительным числом.");
         }
+    }
+
+    private void validateFilmGenres(Film film) throws NotFoundException {
+        if (!film.getGenres().isEmpty()) {
+            film.getGenres().forEach(genre -> genreStorage.findById(genre.getId())
+                    .orElseThrow(() -> new NotFoundException("Жанр с id: " + genre.getId() + " - не найден.")));
+        }
+    }
+
+    private void validateFilmMpa(Film film) throws NotFoundException {
+        if (film.getMpa() != null) {
+            mpaStorage.findById(film.getMpa().getId())
+                    .orElseThrow(() -> new NotFoundException("Рейтинг с id: " + film.getMpa().getId() + " - не найден."));
+        }
+    }
+
+    private void validateFilm(Film film) {
+        validateFilmDate(film);
+        validateFilmDuration(film);
+        validateFilmGenres(film);
+        validateFilmMpa(film);
     }
 }

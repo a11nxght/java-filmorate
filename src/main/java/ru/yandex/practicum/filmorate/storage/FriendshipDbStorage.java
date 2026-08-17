@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class FriendshipDbStorage implements  FriendshipStorage {
+public class FriendshipDbStorage implements FriendshipStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -15,33 +15,40 @@ public class FriendshipDbStorage implements  FriendshipStorage {
             VALUES (?, ?, ?);
             """;
 
-    private static final String IS_FRIENDS_QUERY = """
-            SELECT status
-            FROM friends
-            WHERE user_id = ? and friend_id = ?;
+    private static final String UPDATE_FRIENDSHIP_STATUS_QUERY = """
+                    UPDATE friends
+                    SET status = ?
+                    WHERE user_id = ? AND friend_id = ?;
             """;
 
-    private static final String UPDATE_FRIENDSHIP_STATUS_QUERY = """
-            UPDATE friends
-            SET status = ?
-            WHERE user_id = ? AND friend_id = ?;
-    """;
-
     private static final String DELETE_FRIENDSHIP_QUERY = """
-            DELETE FROM friends
-            WHERE user_id = ? AND friend_id = ?;
-    """;
+                    DELETE FROM friends
+                    WHERE user_id = ? AND friend_id = ?;
+            """;
+
+    private static final String SELECT_STATUS_QUERY = """
+                    SELECT COUNT(*)
+                    FROM friends
+                    WHERE user_id = ? AND friend_id = ?;
+            """;
 
     @Override
     public void addFriend(long userId, long friendId) {
-        jdbcTemplate.update(INSERT_QUERY, userId, friendId, true);
-        jdbcTemplate.update(INSERT_QUERY, friendId, userId, true);
+        Integer isFriendAddUser = jdbcTemplate.queryForObject(SELECT_STATUS_QUERY, Integer.class,
+                friendId, userId);
+        if (isFriendAddUser != null && isFriendAddUser > 0) {
+            jdbcTemplate.update(INSERT_QUERY, userId, friendId, true);
+
+            updateFriendshipStatus(true, friendId, userId);
+        } else {
+            jdbcTemplate.update(INSERT_QUERY, userId, friendId, false);
+        }
     }
 
     @Override
     public void removeFriend(long userId, long friendId) {
         jdbcTemplate.update(DELETE_FRIENDSHIP_QUERY, userId, friendId);
-        jdbcTemplate.update(DELETE_FRIENDSHIP_QUERY, friendId, userId);
+        updateFriendshipStatus(false, friendId, userId);
     }
 
     public void updateFriendshipStatus(Boolean status, long userId, long friendId) {
