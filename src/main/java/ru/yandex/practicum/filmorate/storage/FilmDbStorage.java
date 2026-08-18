@@ -48,7 +48,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    f.mpa_id AS mpa_id,
                    m.name AS mpa_name
             FROM films AS f
-            JOIN mpa AS m ON f.mpa_id = m.id
+            LEFT JOIN mpa AS m ON f.mpa_id = m.id
             WHERE f.id=?;
             """;
 
@@ -61,7 +61,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    f.mpa_id AS mpa_id,
                    m.name AS mpa_name
             FROM films AS f
-            JOIN mpa AS m ON f.mpa_id = m.id
+            LEFT JOIN mpa AS m ON f.mpa_id = m.id
             ORDER BY id;
             """;
 
@@ -74,13 +74,14 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    f.mpa_id AS mpa_id,
                    m.name AS mpa_name
             FROM films AS f
-            JOIN mpa AS m ON f.mpa_id = m.id
+            LEFT JOIN mpa AS m ON f.mpa_id = m.id
             JOIN
               (SELECT film_id,
                       COUNT(*) AS likes_count
                FROM likes
                GROUP BY film_id
                ORDER BY likes_count DESC) AS l ON f.id = l.film_id
+            ORDER BY likes_count DESC
             LIMIT ?;
             """;
 
@@ -107,7 +108,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 film.getDuration(),
                 film.getMpa() != null ? film.getMpa().getId() : null);
         film.setId(id);
-        if (!film.getGenres().isEmpty()) {
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             for (Genre genre : film.getGenres()) {
                 jdbcTemplate.update(INSERT_GENRE_QUERY, film.getId(), genre.getId());
             }
