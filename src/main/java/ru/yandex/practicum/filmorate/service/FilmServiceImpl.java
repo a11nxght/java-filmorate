@@ -35,26 +35,28 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film add(Film film) {
+        log.info("Start adding film: {}", film);
         validateFilm(film);
-        log.info("Adding film: {}", film);
         return filmStorage.save(film);
     }
 
     @Override
     public Film update(Film film) {
+        log.info("Start updating film: {}", film);
         filmStorage.findById(film.getId()).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
         validateFilm(film);
-        log.info("Updating film: {}", film);
         return filmStorage.update(film);
     }
 
     @Override
     public void delete(long id) {
+        log.info("Start deleting film with id: {}", id);
         filmStorage.delete(id);
     }
 
     @Override
     public Film findById(long id) {
+        log.info("Start finding film with id: {}", id);
         Film film = filmStorage.findById(id).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
         filmStorage.setFilmGenres(film);
         return film;
@@ -62,11 +64,13 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> findAll() {
+        log.info("Start finding all films");
         return filmStorage.findAll();
     }
 
     @Override
     public void addLike(long filmId, long userId) {
+        log.info("Start adding like to film with id: {} from user with id: {}", filmId,  userId);
         filmStorage.findById(filmId).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
         userStorage.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден."));
         likesStorage.addLike(filmId, userId);
@@ -74,6 +78,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public void removeLike(long filmId, long userId) {
+        log.info("Start remove like to film with id: {} from user with id: {}", filmId,  userId);
         filmStorage.findById(filmId).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
         userStorage.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден."));
         likesStorage.removeLike(filmId, userId);
@@ -81,19 +86,20 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getPopular(int count) {
+        log.info("Start getting popular films");
         return filmStorage.findPopular(count);
     }
 
     private void validateFilmDate(Film film) throws ValidationException {
         if (film.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
-            log.debug("Film date: {} is not valid", film.getReleaseDate());
+            log.warn("Film date: {} is not valid", film.getReleaseDate());
             throw new ValidationException("Дата релиза должна быть не раньше 28 декабря 1895 года.");
         }
     }
 
     private void validateFilmDuration(Film film) throws ValidationException {
         if (film.getDuration() < 0) {
-            log.debug("Film duration: {} is not valid", film.getDuration());
+            log.warn("Film duration: {} is not valid", film.getDuration());
             throw new ValidationException("Продолжительность фильма должна быть положительным числом.");
         }
     }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -9,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Repository("FilmDbStorage")
 public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
@@ -97,6 +99,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     public Film save(Film film) {
+        log.info("Making a request to save a film");
         long id = save(INSERT_QUERY,
                 film.getName(),
                 film.getDescription(),
@@ -114,11 +117,13 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     public void delete(long id) {
+        log.info("Making a request to delete a film");
         delete(DELETE_QUERY, id);
     }
 
     @Override
     public Film update(Film film) {
+        log.info("Making a request to update a film");
         update(UPDATE_QUERY,
                 film.getName(),
                 film.getDescription(),
@@ -130,21 +135,25 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
 
     @Override
     public Optional<Film> findById(long id) {
+        log.info("Making a request to find a film by id: {}", id);
         return findOne(FIND_BY_ID_QUERY, id);
     }
 
     @Override
     public List<Film> findAll() {
+        log.info("Making a request to find all films");
         return findMany(FIND_ALL_QUERY);
     }
 
     @Override
     public List<Film> findPopular(int count) {
+        log.info("Making a request to find all popular films");
         return findMany(FIND_POPULAR_QUERY, count);
     }
 
     @Override
     public void setFilmGenres(Film film) {
+        log.info("Making a request to set genres");
         List<Genre> genres = jdbcTemplate.query(FIND_ALL_GENRES_QUERY, (rs, rowNum) ->
                         Genre.builder()
                                 .id(rs.getLong("id"))

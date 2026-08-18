@@ -27,6 +27,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User add(User user) {
+        log.info("Start adding user {}", user);
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
@@ -40,6 +41,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User update(User updateUser) {
+        log.info("Start updating user {}", updateUser);
         userStorage.findById(updateUser.getId())
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + updateUser.getId() + " не найден."));
         return userStorage.update(updateUser);
@@ -47,21 +49,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void delete(long id) {
+        log.info("Start deleting user {}", id);
         userStorage.delete(id);
     }
 
     @Override
     public User findById(long id) {
+        log.info("Start finding user {}", id);
         return userStorage.findById(id).orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден."));
     }
 
     @Override
     public List<User> findAll() {
+        log.info("Start finding all users");
         return userStorage.findAll().stream().toList();
     }
 
     @Override
     public void addFriend(long userId, long friendId) {
+        log.info("Start adding friend {} to the user {}", friendId, userId);
         userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         userStorage.findById(friendId)
@@ -72,6 +78,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void removeFriend(long userId, long friendId) {
+        log.info("Start removing friend {} to the user {}", friendId, userId);
         userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         userStorage.findById(friendId)
@@ -81,6 +88,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findFriends(long userId) {
+        log.info("Start finding friends for user {}", userId);
         userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         return userStorage.findFriends(userId);
@@ -88,6 +96,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findCommonFriends(long userId, long friendId) {
+        log.info("Start finding common friends for user {} and friend {}", userId, friendId);
         userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         userStorage.findById(friendId)

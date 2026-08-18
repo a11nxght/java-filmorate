@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+@Slf4j
 @Repository
 @RequiredArgsConstructor
 public class FriendshipDbStorage implements FriendshipStorage {
@@ -34,6 +36,7 @@ public class FriendshipDbStorage implements FriendshipStorage {
 
     @Override
     public void addFriend(long userId, long friendId) {
+        log.info("making a request to add a friendship");
         Integer isFriendAddUser = jdbcTemplate.queryForObject(SELECT_STATUS_QUERY, Integer.class,
                 friendId, userId);
         if (isFriendAddUser != null && isFriendAddUser > 0) {
@@ -47,6 +50,7 @@ public class FriendshipDbStorage implements FriendshipStorage {
 
     @Override
     public void removeFriend(long userId, long friendId) {
+        log.info("making a request to remove a friendship");
         jdbcTemplate.update(DELETE_FRIENDSHIP_QUERY, userId, friendId);
         updateFriendshipStatus(false, friendId, userId);
     }
