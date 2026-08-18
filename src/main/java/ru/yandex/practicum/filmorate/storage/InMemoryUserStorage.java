@@ -7,13 +7,13 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.*;
 
 @Slf4j
-@Component
+@Component("InMemoryUserStorage")
 public class InMemoryUserStorage implements UserStorage {
 
     private final Map<Long, User> users = new HashMap<>();
 
     @Override
-    public User add(User user) {
+    public User save(User user) {
         user.setId(getNextId());
         users.put(user.getId(), user);
         log.info("Added user: {}", user);
@@ -33,13 +33,23 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> get(long id) {
+    public Optional<User> findById(long id) {
         return Optional.ofNullable(users.get(id));
     }
 
     @Override
-    public Collection<User> getAll() {
-        return users.values();
+    public List<User> findAll() {
+        return users.values().stream().toList();
+    }
+
+    @Override
+    public List<User> findFriends(long userId) {
+        return List.of();
+    }
+
+    @Override
+    public List<User> findCommonFriends(long userId, long friendId) {
+        return List.of();
     }
 
     private long getNextId() {
