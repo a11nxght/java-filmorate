@@ -86,17 +86,38 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             """;
 
     private static final String INSERT_GENRE_QUERY = """
-                INSERT INTO film_genre (film_id, genre_id)
-                VALUES (?, ?);
-    """;
+                        INSERT INTO film_genre (film_id, genre_id)
+                        VALUES (?, ?);
+            """;
 
     private static final String FIND_ALL_GENRES_QUERY = """
-                SELECT g.id AS id,
-                               g.name AS name
-                        FROM film_genre AS fg
-                        JOIN genres AS g ON fg.genre_id = g.id
-                        WHERE fg.film_id = ?;
-    """;
+                        SELECT g.id AS id,
+                                       g.name AS name
+                                FROM film_genre AS fg
+                                JOIN genres AS g ON fg.genre_id = g.id
+                                WHERE fg.film_id = ?;
+            """;
+
+    private static final String FIND_COMMON_QUERY = """
+            SELECT f.id AS id,
+                   f.name AS name,
+                   f.description AS description,
+                   f.release_date AS release_date,
+                   f.duration AS duration,
+                   f.mpa_id AS mpa_id,
+                   m.name AS mpa_name
+            FROM films AS f
+            LEFT JOIN mpa AS m ON f.mpa_id = m.id
+            JOIN
+              (SELECT film_id,
+                      COUNT(*) AS likes_count
+               FROM likes
+               GROUP BY film_id
+               ORDER BY likes_count DESC) AS l ON f.id = l.film_id
+            JOIN likes AS l1 ON f.id = l1.film_id AND l1.user_id = ?
+            JOIN likes AS l2 ON f.id = l2.film_id AND l2.user_id = ?
+            ORDER BY likes_count DESC;
+            """;
 
     @Override
     public Film save(Film film) {
@@ -153,14 +174,8 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public void setFilmGenres(Film film) {
-        log.info("Making a request to set genres");
-        List<Genre> genres = jdbcTemplate.query(FIND_ALL_GENRES_QUERY, (rs, rowNum) ->
-                        Genre.builder()
-                                .id(rs.getLong("id"))
-                                .name(rs.getString("name"))
-                                .build(),
-                film.getId());
-        genres.forEach(genre -> film.getGenres().add(genre));
+    public List<Film> findCommon(long userId, long friendId) {
+        log.info("Making a request to get common films");
+        return findMany(FIND_COMMON_QUERY, userId, friendId);
     }
 }

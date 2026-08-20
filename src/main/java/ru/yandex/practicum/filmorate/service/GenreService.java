@@ -8,4 +8,6 @@ public interface GenreService {
     Genre findById(long id);
 
     List<Genre> findAll();
+
+    List<Genre> findFilmGenres(long filmId);
 }

@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -10,9 +10,11 @@ import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
 
     private final FilmStorage filmStorage;
@@ -20,18 +22,6 @@ public class FilmServiceImpl implements FilmService {
     private final LikesStorage likesStorage;
     private final GenreStorage genreStorage;
     private final MPAStorage mpaStorage;
-
-    public FilmServiceImpl(@Qualifier("FilmDbStorage") FilmStorage filmStorage,
-                           @Qualifier("UserDbStorage") UserStorage userStorage,
-                           LikesStorage likesStorage,
-                           GenreStorage genreStorage,
-                           MPAStorage mpaStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-        this.likesStorage = likesStorage;
-        this.genreStorage = genreStorage;
-        this.mpaStorage = mpaStorage;
-    }
 
     @Override
     public Film add(Film film) {
@@ -58,14 +48,14 @@ public class FilmServiceImpl implements FilmService {
     public Film findById(long id) {
         log.info("Start finding film with id: {}", id);
         Film film = filmStorage.findById(id).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
-        filmStorage.setFilmGenres(film);
+        setFilmGenres(film);
         return film;
     }
 
     @Override
     public List<Film> findAll() {
         log.info("Start finding all films");
-        return filmStorage.findAll();
+        return filmStorage.findAll().stream().peek(this::setFilmGenres).collect(Collectors.toList());
     }
 
     @Override
@@ -85,9 +75,24 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public List<Film> getPopular(int count) {
+    public List<Film> findPopular(int count) {
         log.info("Start getting popular films");
         return filmStorage.findPopular(count);
+    }
+
+    @Override
+    public List<Film> findCommonFilms(long userId, long friendId) {
+        log.info("Start getting common films");
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " - не найден."));
+        userStorage.findById(friendId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " - не найден."));
+        return filmStorage.findCommon(userId, friendId).stream().peek(this::setFilmGenres).collect(Collectors.toList());
+    }
+
+
+    private void setFilmGenres(Film film) {
+        film.getGenres().addAll(genreStorage.findFilmGenres(film.getId()));
     }
 
     private void validateFilmDate(Film film) throws ValidationException {
