@@ -20,4 +20,6 @@ public interface FilmStorage {
     List<Film> findPopular(int count);
 
     void setFilmGenres(Film film);
+
+    List<Film> findCommon(long userId, long friendId);
 }
