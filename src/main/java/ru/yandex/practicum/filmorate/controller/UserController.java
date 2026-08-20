@@ -75,4 +75,10 @@ public class UserController {
         userService.delete(userId);
         log.info("User deleted");
     }
+
+    @GetMapping("{userId}")
+    public User getUser(@PathVariable long userId) {
+        log.info("Getting user {}", userId);
+        return userService.findById(userId);
+    }
 }

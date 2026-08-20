@@ -75,7 +75,7 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    m.name AS mpa_name
             FROM films AS f
             LEFT JOIN mpa AS m ON f.mpa_id = m.id
-            JOIN
+            LEFT JOIN
               (SELECT film_id,
                       COUNT(*) AS likes_count
                FROM likes
@@ -88,14 +88,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     private static final String INSERT_GENRE_QUERY = """
                         INSERT INTO film_genre (film_id, genre_id)
                         VALUES (?, ?);
-            """;
-
-    private static final String FIND_ALL_GENRES_QUERY = """
-                        SELECT g.id AS id,
-                                       g.name AS name
-                                FROM film_genre AS fg
-                                JOIN genres AS g ON fg.genre_id = g.id
-                                WHERE fg.film_id = ?;
             """;
 
     private static final String FIND_COMMON_QUERY = """
