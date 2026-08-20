@@ -68,4 +68,17 @@ public class UserController {
         log.info("Common friends found for user(id:{})", id);
         return result;
     }
+
+    @DeleteMapping("{userId}")
+    public void deleteUser(@PathVariable long userId) {
+        log.info("Deleting user {}", userId);
+        userService.delete(userId);
+        log.info("User deleted");
+    }
+
+    @GetMapping("{userId}")
+    public User getUser(@PathVariable long userId) {
+        log.info("Getting user {}", userId);
+        return userService.findById(userId);
+    }
 }

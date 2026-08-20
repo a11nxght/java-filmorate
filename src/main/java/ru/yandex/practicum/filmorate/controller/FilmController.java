@@ -71,4 +71,11 @@ public class FilmController {
         log.info("Fetching common films");
         return filmService.findCommonFilms(userId, friendId);
     }
+
+    @DeleteMapping("{filmId}")
+    public void delete(@PathVariable long filmId) {
+        log.info("Deleting film with id: {}", filmId);
+        filmService.delete(filmId);
+        log.info("Film deleted");
+    }
 }
