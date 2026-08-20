@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -47,14 +48,14 @@ public class FilmServiceImpl implements FilmService {
     public Film findById(long id) {
         log.info("Start finding film with id: {}", id);
         Film film = filmStorage.findById(id).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
-        filmStorage.setFilmGenres(film);
+        setFilmGenres(film);
         return film;
     }
 
     @Override
     public List<Film> findAll() {
         log.info("Start finding all films");
-        return filmStorage.findAll();
+        return filmStorage.findAll().stream().peek(this::setFilmGenres).collect(Collectors.toList());
     }
 
     @Override
@@ -86,7 +87,12 @@ public class FilmServiceImpl implements FilmService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " - не найден."));
         userStorage.findById(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " - не найден."));
-        return filmStorage.findCommon(userId, friendId);
+        return filmStorage.findCommon(userId, friendId).stream().peek(this::setFilmGenres).collect(Collectors.toList());
+    }
+
+
+    private void setFilmGenres(Film film) {
+        film.getGenres().addAll(genreStorage.findFilmGenres(film.getId()));
     }
 
     private void validateFilmDate(Film film) throws ValidationException {

@@ -174,18 +174,6 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     }
 
     @Override
-    public void setFilmGenres(Film film) {
-        log.info("Making a request to set genres");
-        List<Genre> genres = jdbcTemplate.query(FIND_ALL_GENRES_QUERY, (rs, rowNum) ->
-                        Genre.builder()
-                                .id(rs.getLong("id"))
-                                .name(rs.getString("name"))
-                                .build(),
-                film.getId());
-        genres.forEach(genre -> film.getGenres().add(genre));
-    }
-
-    @Override
     public List<Film> findCommon(long userId, long friendId) {
         log.info("Making a request to get common films");
         return findMany(FIND_COMMON_QUERY, userId, friendId);
