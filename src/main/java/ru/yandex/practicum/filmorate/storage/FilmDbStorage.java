@@ -85,6 +85,69 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             LIMIT ?;
             """;
 
+    private static final String FIND_POPULAR_WITH_GENRE_AND_YEAR_QUERY = """
+            SELECT f.id AS id,
+                   f.name AS name,
+                   f.description AS description,
+                   f.release_date AS release_date,
+                   f.duration AS duration,
+                   f.mpa_id AS mpa_id,
+                   m.name AS mpa_name
+            FROM films AS f
+            LEFT JOIN mpa AS m ON f.mpa_id = m.id
+            LEFT JOIN
+              (SELECT film_id,
+                      COUNT(*) AS likes_count
+               FROM likes
+               GROUP BY film_id
+               ORDER BY likes_count DESC) AS l ON f.id = l.film_id
+            JOIN film_genre AS fg ON f.id = fg.film_id AND fg.genre_id = ?
+            WHERE EXTRACT(YEAR FROM release_date) = ?
+            ORDER BY likes_count DESC
+            LIMIT ?;
+            """;
+
+    private static final String FIND_POPULAR_WITH_GENRE_QUERY = """
+            SELECT f.id AS id,
+                   f.name AS name,
+                   f.description AS description,
+                   f.release_date AS release_date,
+                   f.duration AS duration,
+                   f.mpa_id AS mpa_id,
+                   m.name AS mpa_name
+            FROM films AS f
+            LEFT JOIN mpa AS m ON f.mpa_id = m.id
+            LEFT JOIN
+              (SELECT film_id,
+                      COUNT(*) AS likes_count
+               FROM likes
+               GROUP BY film_id
+               ORDER BY likes_count DESC) AS l ON f.id = l.film_id
+            JOIN film_genre AS fg ON f.id = fg.film_id AND fg.genre_id = ?
+            ORDER BY likes_count DESC
+            LIMIT ?;
+            """;
+
+    private static final String FIND_POPULAR_WITH_YEAR_QUERY = """
+            SELECT f.id AS id,
+                   f.name AS name,
+                   f.description AS description,
+                   f.release_date AS release_date,
+                   f.duration AS duration,
+                   f.mpa_id AS mpa_id,
+                   m.name AS mpa_name
+            FROM films AS f
+            LEFT JOIN mpa AS m ON f.mpa_id = m.id
+            LEFT JOIN
+              (SELECT film_id,
+                      COUNT(*) AS likes_count
+               FROM likes
+               GROUP BY film_id
+               ORDER BY likes_count DESC) AS l ON f.id = l.film_id
+            WHERE EXTRACT(YEAR FROM release_date) = ?
+            ORDER BY likes_count DESC
+            LIMIT ?;
+            """;
     private static final String INSERT_GENRE_QUERY = """
                         INSERT INTO film_genre (film_id, genre_id)
                         VALUES (?, ?);
@@ -163,6 +226,24 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     public List<Film> findPopular(int count) {
         log.info("Making a request to find all popular films");
         return findMany(FIND_POPULAR_QUERY, count);
+    }
+
+    @Override
+    public List<Film> findPopularWithGenreAndYear(int count, long genreId, int year) {
+        log.info("Making a request to find all popular films with genreId: {} and year: {}", genreId, year);
+        return findMany(FIND_POPULAR_WITH_GENRE_AND_YEAR_QUERY, genreId, year, count);
+    }
+
+    @Override
+    public List<Film> findPopularWithGenre(int count, long genreId) {
+        log.info("Making a request to find all popular films with genreId: {}", genreId);
+        return findMany(FIND_POPULAR_WITH_GENRE_QUERY, genreId, count);
+    }
+
+    @Override
+    public List<Film> findPopularWithYear(int count, int year) {
+        log.info("Making a request to find all popular films with year: {}", year);
+        return findMany(FIND_POPULAR_WITH_YEAR_QUERY, year, count);
     }
 
     @Override
