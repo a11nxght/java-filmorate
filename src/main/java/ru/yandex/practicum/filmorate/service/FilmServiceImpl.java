@@ -77,7 +77,29 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public List<Film> findPopular(int count) {
         log.info("Start getting popular films");
-        return filmStorage.findPopular(count);
+        return filmStorage.findPopular(count)
+                .stream().peek(this::setFilmGenres).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> findPopularWithGenreAndYear(int count, long genreId, int year) {
+        log.info("Start getting popular films with genre: {} and year: {}", genreId, year);
+        return filmStorage.findPopularWithGenreAndYear(count, genreId, year)
+                .stream().peek(this::setFilmGenres).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> findPopularWithGenre(int count, long genreId) {
+        log.info("Start getting popular films with genre: {}", genreId);
+        return filmStorage.findPopularWithGenre(count, genreId)
+                .stream().peek(this::setFilmGenres).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> findPopularWithYear(int count, int year) {
+        log.info("Start getting popular films with year: {}", year);
+        return filmStorage.findPopularWithYear(count, year)
+                .stream().peek(this::setFilmGenres).collect(Collectors.toList());
     }
 
     @Override
