@@ -73,5 +73,6 @@ public class UserController {
     public void deleteUser(@PathVariable long userId) {
         log.info("Deleting user {}", userId);
         userService.delete(userId);
+        log.info("User deleted");
     }
 }
