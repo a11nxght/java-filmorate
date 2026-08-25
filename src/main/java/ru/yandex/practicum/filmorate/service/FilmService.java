@@ -30,4 +30,6 @@ public interface FilmService {
     List<Film> findCommonFilms(long userId, long friendId);
 
     List<Film> findDirectorFilms(long directorId, List<String> sortBy);
+
+    List<Film> searchFilms(String query, List<String> by);
 }

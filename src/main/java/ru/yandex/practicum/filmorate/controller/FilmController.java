@@ -90,12 +90,19 @@ public class FilmController {
         log.info("Film deleted");
     }
 
-//    GET /films/director/{directorId}?sortBy=[year,likes]
     @GetMapping("/director/{directorId}")
     public Collection<Film> getDirectorFilms(@PathVariable long directorId,
                                              @RequestParam(required = false) List<String> sortBy) {
         log.info("Get director with id: {} films", directorId);
         return filmService.findDirectorFilms(directorId, sortBy);
+    }
+
+//    GET /fimls/search
+    @GetMapping("search")
+    public Collection<Film> searchFilms(@RequestParam String query,
+                                        @RequestParam List<String> by) {
+        log.info("Search films with query: {}", query);
+        return filmService.searchFilms(query, by);
     }
 
 }
