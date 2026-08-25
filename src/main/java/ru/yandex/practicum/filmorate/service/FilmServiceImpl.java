@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +23,7 @@ public class FilmServiceImpl implements FilmService {
     private final LikesStorage likesStorage;
     private final GenreStorage genreStorage;
     private final MPAStorage mpaStorage;
+    private final DirectorStorage directorStorage;
 
     @Override
     public Film add(Film film) {
@@ -112,9 +114,30 @@ public class FilmServiceImpl implements FilmService {
         return filmStorage.findCommon(userId, friendId).stream().peek(this::setFilmGenres).collect(Collectors.toList());
     }
 
+    @Override
+    public List<Film> findDirectorFilms(long directorId, List<String> sortBy) {
+        directorStorage.findById(directorId)
+                .orElseThrow(() -> new NotFoundException("Режиссер с id: " + directorId + " - не найден."));
+        List<Film> directorFilms = filmStorage.findByDirector(directorId);
+        if (sortBy != null) {
+            if (sortBy.contains("year")) {
+                directorFilms = directorFilms.stream().sorted(Comparator.comparing(Film::getReleaseDate)).toList();
+            } else if (sortBy.contains("likes")) {
+                directorFilms = directorFilms.stream().sorted(Comparator.comparing(Film::getLikes).reversed()).toList();
+            }
+        }
+        return directorFilms.stream()
+                .peek(this::setFilmGenres)
+                .peek(this::setFilmDirectors)
+                .collect(Collectors.toList());
+    }
 
     private void setFilmGenres(Film film) {
         film.getGenres().addAll(genreStorage.findFilmGenres(film.getId()));
+    }
+
+    private void setFilmDirectors(Film film) {
+        film.getDirectors().addAll(directorStorage.findFilmDirectors(film.getId()));
     }
 
     private void validateFilmDate(Film film) throws ValidationException {

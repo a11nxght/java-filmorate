@@ -22,11 +22,10 @@ public class Film {
     private String description;
     private LocalDate releaseDate;
     private int duration;
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private final Set<Long> likes = new HashSet<>();
+    private int likes;
     private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private MPA mpa;
+    private Set<Director> directors = new HashSet<>();
 }

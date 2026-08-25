@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -46,9 +47,16 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    f.release_date AS release_date,
                    f.duration AS duration,
                    f.mpa_id AS mpa_id,
-                   m.name AS mpa_name
+                   m.name AS mpa_name,
+                   l.likes_count AS likes
             FROM films AS f
             LEFT JOIN mpa AS m ON f.mpa_id = m.id
+            LEFT JOIN
+              (SELECT film_id,
+                      COUNT(*) AS likes_count
+               FROM likes
+               GROUP BY film_id
+               ORDER BY likes_count DESC) AS l ON f.id = l.film_id
             WHERE f.id=?;
             """;
 
@@ -59,9 +67,16 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    f.release_date AS release_date,
                    f.duration AS duration,
                    f.mpa_id AS mpa_id,
-                   m.name AS mpa_name
+                   m.name AS mpa_name,
+                   l.likes_count AS likes
             FROM films AS f
             LEFT JOIN mpa AS m ON f.mpa_id = m.id
+            LEFT JOIN
+              (SELECT film_id,
+                      COUNT(*) AS likes_count
+               FROM likes
+               GROUP BY film_id
+               ORDER BY likes_count DESC) AS l ON f.id = l.film_id
             ORDER BY id;
             """;
 
@@ -72,7 +87,8 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    f.release_date AS release_date,
                    f.duration AS duration,
                    f.mpa_id AS mpa_id,
-                   m.name AS mpa_name
+                   m.name AS mpa_name,
+                   l.likes_count AS likes
             FROM films AS f
             LEFT JOIN mpa AS m ON f.mpa_id = m.id
             LEFT JOIN
@@ -92,7 +108,8 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    f.release_date AS release_date,
                    f.duration AS duration,
                    f.mpa_id AS mpa_id,
-                   m.name AS mpa_name
+                   m.name AS mpa_name,
+                   l.likes_count AS likes
             FROM films AS f
             LEFT JOIN mpa AS m ON f.mpa_id = m.id
             LEFT JOIN
@@ -114,7 +131,8 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    f.release_date AS release_date,
                    f.duration AS duration,
                    f.mpa_id AS mpa_id,
-                   m.name AS mpa_name
+                   m.name AS mpa_name,
+                   l.likes_count AS likes
             FROM films AS f
             LEFT JOIN mpa AS m ON f.mpa_id = m.id
             LEFT JOIN
@@ -135,7 +153,8 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    f.release_date AS release_date,
                    f.duration AS duration,
                    f.mpa_id AS mpa_id,
-                   m.name AS mpa_name
+                   m.name AS mpa_name,
+                   l.likes_count AS likes
             FROM films AS f
             LEFT JOIN mpa AS m ON f.mpa_id = m.id
             LEFT JOIN
@@ -152,6 +171,17 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                         INSERT INTO film_genre (film_id, genre_id)
                         VALUES (?, ?);
             """;
+    private static final String INSERT_DIRECTOR_QUERY = """
+            INSERT INTO film_director (film_id, director_id)
+            VALUES (?, ?);
+            """;
+
+    private static final String DELETE_DIRECTOR_QUERY = """
+                    DELETE FROM film_director
+                    WHERE film_id = ?;
+    """;
+
+
 
     private static final String FIND_COMMON_QUERY = """
             SELECT f.id AS id,
@@ -160,10 +190,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                    f.release_date AS release_date,
                    f.duration AS duration,
                    f.mpa_id AS mpa_id,
-                   m.name AS mpa_name
+                   m.name AS mpa_name,
+                   l.likes_count AS likes
             FROM films AS f
             LEFT JOIN mpa AS m ON f.mpa_id = m.id
-            JOIN
+            LEFT JOIN
               (SELECT film_id,
                       COUNT(*) AS likes_count
                FROM likes
@@ -173,6 +204,29 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             JOIN likes AS l2 ON f.id = l2.film_id AND l2.user_id = ?
             ORDER BY likes_count DESC;
             """;
+
+    private static final String FIND_DIRECTOR_FILM_QUERY = """
+            SELECT f.id AS id,
+                   f.name AS name,
+                   f.description AS description,
+                   f.release_date AS release_date,
+                   f.duration AS duration,
+                   f.mpa_id AS mpa_id,
+                   m.name AS mpa_name,
+                   l.likes_count AS likes
+            FROM films AS f
+            LEFT JOIN mpa AS m ON f.mpa_id = m.id
+            LEFT JOIN
+              (SELECT film_id,
+                      COUNT(*) AS likes_count
+               FROM likes
+               GROUP BY film_id
+               ORDER BY likes_count DESC) AS l ON f.id = l.film_id
+            JOIN film_director AS fd ON f.id = fd.film_id
+            WHERE fd.director_id = ?
+            ORDER BY id;
+            """;
+
 
     @Override
     public Film save(Film film) {
@@ -186,7 +240,12 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         film.setId(id);
         if (film.getGenres() != null && !film.getGenres().isEmpty()) {
             for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(INSERT_GENRE_QUERY, film.getId(), genre.getId());
+                update(INSERT_GENRE_QUERY, film.getId(), genre.getId());
+            }
+        }
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            for (Director director : film.getDirectors()) {
+                update(INSERT_DIRECTOR_QUERY, film.getId(), director.getId());
             }
         }
         return film;
@@ -207,6 +266,12 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 film.getReleaseDate(),
                 film.getDuration(),
                 film.getId());
+        if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
+            delete(DELETE_DIRECTOR_QUERY, film.getId());
+            for (Director director : film.getDirectors()) {
+                update(INSERT_DIRECTOR_QUERY, film.getId(), director.getId());
+            }
+        }
         return film;
     }
 
@@ -250,5 +315,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     public List<Film> findCommon(long userId, long friendId) {
         log.info("Making a request to get common films");
         return findMany(FIND_COMMON_QUERY, userId, friendId);
+    }
+
+    @Override
+    public List<Film> findByDirector(long directorId) {
+        log.info("Making a request to get films with director id: {}", directorId);
+        return findMany(FIND_DIRECTOR_FILM_QUERY, directorId);
     }
 }
