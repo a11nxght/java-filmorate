@@ -23,6 +23,7 @@ public class FilmRowMapper implements RowMapper<Film> {
                 .id(rs.getLong("mpa_id"))
                 .name(rs.getString("mpa_name"))
                 .build());
+        film.setLikes(rs.getInt("likes"));
         return film;
     }
 }

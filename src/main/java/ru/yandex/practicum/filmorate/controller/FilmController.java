@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -88,4 +89,13 @@ public class FilmController {
         filmService.delete(filmId);
         log.info("Film deleted");
     }
+
+//    GET /films/director/{directorId}?sortBy=[year,likes]
+    @GetMapping("/director/{directorId}")
+    public Collection<Film> getDirectorFilms(@PathVariable long directorId,
+                                             @RequestParam(required = false) List<String> sortBy) {
+        log.info("Get director with id: {} films", directorId);
+        return filmService.findDirectorFilms(directorId, sortBy);
+    }
+
 }

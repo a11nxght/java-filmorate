@@ -28,4 +28,6 @@ public interface FilmService {
     List<Film> findPopularWithYear(int count, int year);
 
     List<Film> findCommonFilms(long userId, long friendId);
+
+    List<Film> findDirectorFilms(long directorId, List<String> sortBy);
 }
