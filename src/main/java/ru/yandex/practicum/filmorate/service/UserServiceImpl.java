@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.FriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -14,16 +16,12 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserStorage userStorage;
     private final FriendshipStorage friendshipStorage;
-
-    public UserServiceImpl(@Qualifier("UserDbStorage") UserStorage userStorage,
-                           FriendshipStorage friendshipStorage) {
-        this.userStorage = userStorage;
-        this.friendshipStorage = friendshipStorage;
-    }
+    private final FilmStorage filmStorage;
 
     @Override
     public User add(User user) {
@@ -102,5 +100,13 @@ public class UserServiceImpl implements UserService {
         userStorage.findById(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " не найден."));
         return userStorage.findCommonFriends(userId, friendId);
+    }
+
+    @Override
+    public List<Film> findRecommendations(long userId) {
+        log.info("Start finding recommendations for user {}", userId);
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
+        return filmStorage.findRecommendations(userId);
     }
 }

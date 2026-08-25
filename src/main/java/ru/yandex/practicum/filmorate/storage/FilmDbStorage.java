@@ -248,6 +248,42 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                     WHERE 1=1
             """;
 
+    private static final String FIND_RECOMMENDATIONS_QUERY = """
+                   SELECT f.id AS id,
+                          f.name AS name,
+                          f.description AS description,
+                          f.release_date AS release_date,
+                          f.duration AS duration,
+                          f.mpa_id AS mpa_id,
+                          m.name AS mpa_name,
+                          l.likes_count AS likes
+                   FROM films AS f
+                   LEFT JOIN mpa AS m ON f.mpa_id = m.id
+                   LEFT JOIN
+                     (SELECT film_id,
+                             COUNT(*) AS likes_count
+                      FROM likes
+                      GROUP BY film_id
+                      ORDER BY likes_count DESC) AS l ON f.id = l.film_id
+                   JOIN likes AS l1 ON f.id = l1.film_id
+                   AND l1.user_id =
+                     (SELECT user_id
+                      FROM likes
+                      WHERE film_id IN
+                          (SELECT film_id
+                           FROM likes
+                           WHERE user_id = ?)
+                        AND user_id <> ?
+                      GROUP BY user_id
+                      ORDER BY COUNT(*) DESC
+                      LIMIT 1)
+                   AND l1.film_id NOT IN
+                     (SELECT film_id
+                      FROM likes
+                      WHERE user_id = ?)
+                   ORDER BY likes_count DESC;
+    """;
+
     private static final String SEARCH_ORDER_BY_LIKES_SUBQUERY = """
                     ORDER BY likes_count DESC;
             """;
@@ -363,5 +399,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         queryForDb += SEARCH_ORDER_BY_LIKES_SUBQUERY;
         log.info("Making a request to search films with query: {}", query);
         return findMany(queryForDb);
+    }
+
+    @Override
+    public List<Film> findRecommendations(long userId) {
+        log.info("Making a request to find recommendations for user: {}", userId);
+        return findMany(FIND_RECOMMENDATIONS_QUERY, userId, userId, userId);
     }
 }
