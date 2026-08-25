@@ -132,6 +132,15 @@ public class FilmServiceImpl implements FilmService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Film> searchFilms(String query, List<String> by) {
+        log.info("Start search films with query: {}", query);
+        return filmStorage.searchFilms(query, by).stream()
+                .peek(this::setFilmGenres)
+                .peek(this::setFilmDirectors)
+                .collect(Collectors.toList());
+    }
+
     private void setFilmGenres(Film film) {
         film.getGenres().addAll(genreStorage.findFilmGenres(film.getId()));
     }

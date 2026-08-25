@@ -177,10 +177,9 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             """;
 
     private static final String DELETE_DIRECTOR_QUERY = """
-                    DELETE FROM film_director
-                    WHERE film_id = ?;
-    """;
-
+                            DELETE FROM film_director
+                            WHERE film_id = ?;
+            """;
 
 
     private static final String FIND_COMMON_QUERY = """
@@ -227,6 +226,31 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             ORDER BY id;
             """;
 
+    private static final String SEARCH_QUERY = """
+                    SELECT f.id AS id,
+                           f.name AS name,
+                           f.description AS description,
+                           f.release_date AS release_date,
+                           f.duration AS duration,
+                           f.mpa_id AS mpa_id,
+                           m.name AS mpa_name,
+                           l.likes_count AS likes
+                    FROM films AS f
+                    LEFT JOIN mpa AS m ON f.mpa_id = m.id
+                    LEFT JOIN
+                      (SELECT film_id,
+                              COUNT(*) AS likes_count
+                       FROM likes
+                       GROUP BY film_id
+                       ORDER BY likes_count DESC) AS l ON f.id = l.film_id
+                    LEFT JOIN film_director AS fd ON f.id = fd.film_id
+                    LEFT JOIN directors AS d ON fd.director_id = d.id
+                    WHERE 1=1
+            """;
+
+    private static final String SEARCH_ORDER_BY_LIKES_SUBQUERY = """
+                    ORDER BY likes_count DESC;
+            """;
 
     @Override
     public Film save(Film film) {
@@ -321,5 +345,23 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
     public List<Film> findByDirector(long directorId) {
         log.info("Making a request to get films with director id: {}", directorId);
         return findMany(FIND_DIRECTOR_FILM_QUERY, directorId);
+    }
+
+    @Override
+    public List<Film> searchFilms(String query, List<String> by) {
+        String queryForDb = SEARCH_QUERY;
+        if (by != null && !by.isEmpty()) {
+            if (by.contains("director") && by.contains("title")) {
+                queryForDb += "AND d.name LIKE" + " '%" + query + "%' \n";
+                queryForDb += "OR f.name LIKE" + " '%" + query + "%' \n";
+            } else if (by.contains("director")) {
+                queryForDb += "AND d.name LIKE" + " '%" + query + "%' \n";
+            } else if (by.contains("title")) {
+                queryForDb += "AND f.name LIKE" + " '%" + query + "%' \n";
+            }
+        }
+        queryForDb += SEARCH_ORDER_BY_LIKES_SUBQUERY;
+        log.info("Making a request to search films with query: {}", query);
+        return findMany(queryForDb);
     }
 }
