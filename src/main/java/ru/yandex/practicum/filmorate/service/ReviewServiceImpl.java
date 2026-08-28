@@ -6,6 +6,10 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.InternalServerException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.event_feed.Event;
+import ru.yandex.practicum.filmorate.model.event_feed.EventType;
+import ru.yandex.practicum.filmorate.model.event_feed.Operation;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -20,6 +24,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewStorage reviewStorage;
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final EventStorage eventStorage;
 
     @Override
     public Review add(Review review) {
@@ -31,19 +36,39 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new NotFoundException("Film with id " + review.getFilmId() + " not found"));
         userStorage.findById(review.getUserId())
                 .orElseThrow(() -> new NotFoundException("User with id " + review.getUserId() + " not found"));
-        return reviewStorage.save(review);
+        Review savedReview = reviewStorage.save(review);
+        eventStorage.addEvent(Event.builder()
+                .userId(review.getUserId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.ADD)
+                .entityId(savedReview.getReviewId()).build());
+        return savedReview;
     }
 
     @Override
     public Review update(Review review) {
         log.info("Updating review {}", review);
-        return reviewStorage.update(review);
+        Review updReview = reviewStorage.update(review);
+        eventStorage.addEvent(Event.builder()
+                .userId(review.getUserId())
+                .eventType(EventType.REVIEW)
+                .operation(Operation.UPDATE)
+                .entityId(updReview.getReviewId()).build());
+        return updReview;
     }
 
     @Override
     public void delete(long id) {
         log.info("Deleting review {}", id);
+        Long userId = reviewStorage.findById(id)
+                .orElseThrow(() -> new NotFoundException("Review with id " + id + " not found."))
+                .getUserId();
         reviewStorage.delete(id);
+        eventStorage.addEvent(Event.builder()
+                .userId(userId)
+                .eventType(EventType.REVIEW)
+                .operation(Operation.REMOVE)
+                .entityId(id).build());
     }
 
     @Override

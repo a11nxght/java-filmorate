@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event_feed.Event;
 
 import java.util.List;
 
@@ -26,4 +27,6 @@ public interface UserService {
     List<User> findCommonFriends(long userId, long friendId);
 
     List<Film> findRecommendations(long userId);
+
+    List<Event> findEvents(long userId);
 }
