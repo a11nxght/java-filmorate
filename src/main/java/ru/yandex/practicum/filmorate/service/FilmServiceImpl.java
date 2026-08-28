@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.event_feed.Event;
+import ru.yandex.practicum.filmorate.model.event_feed.EventType;
+import ru.yandex.practicum.filmorate.model.event_feed.Operation;
 import ru.yandex.practicum.filmorate.storage.*;
 
 import java.time.LocalDate;
@@ -24,6 +27,7 @@ public class FilmServiceImpl implements FilmService {
     private final GenreStorage genreStorage;
     private final MPAStorage mpaStorage;
     private final DirectorStorage directorStorage;
+    private final EventStorage eventStorage;
 
     @Override
     public Film add(Film film) {
@@ -66,6 +70,12 @@ public class FilmServiceImpl implements FilmService {
         filmStorage.findById(filmId).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
         userStorage.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден."));
         likesStorage.addLike(filmId, userId);
+        eventStorage.addEvent(Event.builder()
+                .userId(userId
+                ).eventType(EventType.LIKE)
+                .operation(Operation.ADD)
+                .entityId(filmId)
+                .build());
     }
 
     @Override
@@ -74,6 +84,12 @@ public class FilmServiceImpl implements FilmService {
         filmStorage.findById(filmId).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
         userStorage.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с таким id не найден."));
         likesStorage.removeLike(filmId, userId);
+        eventStorage.addEvent(Event.builder()
+                .userId(userId
+                ).eventType(EventType.LIKE)
+                .operation(Operation.REMOVE)
+                .entityId(filmId)
+                .build());
     }
 
     @Override
