@@ -38,19 +38,22 @@ public class ReviewServiceImpl implements ReviewService {
                 .orElseThrow(() -> new NotFoundException("User with id " + review.getUserId() + " not found"));
         Review savedReview = reviewStorage.save(review);
         eventStorage.addEvent(Event.builder()
-                .userId(review.getUserId())
+                .userId(savedReview.getUserId())
                 .eventType(EventType.REVIEW)
                 .operation(Operation.ADD)
                 .entityId(savedReview.getReviewId()).build());
         return savedReview;
     }
 
+
     @Override
     public Review update(Review review) {
         log.info("Updating review {}", review);
-        Review updReview = reviewStorage.update(review);
+        reviewStorage.update(review);
+        Review updReview =  reviewStorage.findById(review.getReviewId())
+                .orElseThrow(() -> new NotFoundException("Review with id " + review.getReviewId() + " not found"));
         eventStorage.addEvent(Event.builder()
-                .userId(review.getUserId())
+                .userId(updReview.getUserId())
                 .eventType(EventType.REVIEW)
                 .operation(Operation.UPDATE)
                 .entityId(updReview.getReviewId()).build());
@@ -80,6 +83,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<Review> findAll(Long filmId, int count) {
+        log.info("Finding reviews with filmId {} in DB", filmId);
         if (filmId == null) {
             return reviewStorage.findAll(null, count);
         } else {

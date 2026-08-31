@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS friends (
 CREATE TABLE IF NOT EXISTS likes (
 	film_id INTEGER,
 	user_id INTEGER,
-	CONSTRAINT likes_pk PRIMARY KEY (film_id, user_id),
+-- 	CONSTRAINT likes_pk PRIMARY KEY (film_id, user_id),
 	CONSTRAINT likes_films_fk FOREIGN KEY (film_id) REFERENCES films(id) ON DELETE CASCADE,
 	CONSTRAINT likes_users_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -101,5 +101,5 @@ CREATE TABLE IF NOT EXISTS events (
     event_type VARCHAR(10),
     operation VARCHAR(10),
     entity_id INTEGER,
-    CONSTRAINT events_users_fk FOREIGN KEY (user_id) REFERENCES users(id)
+    CONSTRAINT events_users_fk FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

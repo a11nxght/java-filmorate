@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.model.event_feed.Event;
 import ru.yandex.practicum.filmorate.model.event_feed.EventType;
 import ru.yandex.practicum.filmorate.model.event_feed.Operation;
 import ru.yandex.practicum.filmorate.storage.EventStorage;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.FriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -25,8 +24,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserStorage userStorage;
     private final FriendshipStorage friendshipStorage;
-    private final FilmStorage filmStorage;
     private final EventStorage eventStorage;
+    private final FilmService filmService;
 
     @Override
     public User add(User user) {
@@ -128,12 +127,14 @@ public class UserServiceImpl implements UserService {
         log.info("Start finding recommendations for user {}", userId);
         userStorage.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
-        return filmStorage.findRecommendations(userId);
+        return filmService.findRecommendations(userId);
     }
 
     @Override
     public List<Event> findEvents(long userId) {
         log.info("Start finding events for user {}", userId);
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         return eventStorage.findUserEvents(userId);
     }
 }

@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.event_feed.Event;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,6 +10,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Repository
+@Slf4j
 public class EventDbStorage extends BaseRepository<Event> implements EventStorage {
     public EventDbStorage(JdbcTemplate jdbcTemplate, RowMapper<Event> rowMapper) {
         super(jdbcTemplate, rowMapper);
@@ -28,6 +30,7 @@ public class EventDbStorage extends BaseRepository<Event> implements EventStorag
 
     @Override
     public void addEvent(Event event) {
+        log.info("Adding event {}", event);
         save(INSERT_QUERY,
                 Instant.now(),
                 event.getUserId(),

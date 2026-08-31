@@ -36,7 +36,8 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
             SET name = ?,
                 description = ?,
                 release_date = ?,
-                duration = ?
+                duration = ?,
+                mpa_id = ?
             WHERE id=?;
             """;
 
@@ -180,6 +181,11 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                             DELETE FROM film_director
                             WHERE film_id = ?;
             """;
+
+    private static final String DELETE_FILM_GENRE_QUERY = """
+                    DELETE FROM film_genre
+                    WHERE film_id = ?;
+    """;
 
 
     private static final String FIND_COMMON_QUERY = """
@@ -325,11 +331,18 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
                 film.getDescription(),
                 film.getReleaseDate(),
                 film.getDuration(),
+                film.getMpa() != null ? film.getMpa().getId() : null,
                 film.getId());
+        delete(DELETE_DIRECTOR_QUERY, film.getId());
         if (film.getDirectors() != null && !film.getDirectors().isEmpty()) {
-            delete(DELETE_DIRECTOR_QUERY, film.getId());
             for (Director director : film.getDirectors()) {
                 update(INSERT_DIRECTOR_QUERY, film.getId(), director.getId());
+            }
+        }
+        delete(DELETE_FILM_GENRE_QUERY, film.getId());
+        if (film.getGenres() != null && !film.getGenres().isEmpty()) {
+            for (Genre genre : film.getGenres()) {
+                update(INSERT_GENRE_QUERY, film.getId(), genre.getId());
             }
         }
         return film;
@@ -388,12 +401,12 @@ public class FilmDbStorage extends BaseRepository<Film> implements FilmStorage {
         String queryForDb = SEARCH_QUERY;
         if (by != null && !by.isEmpty()) {
             if (by.contains("director") && by.contains("title")) {
-                queryForDb += "AND d.name LIKE" + " '%" + query + "%' \n";
-                queryForDb += "OR f.name LIKE" + " '%" + query + "%' \n";
+                queryForDb += "AND d.name ILIKE" + " '%" + query + "%' \n";
+                queryForDb += "OR f.name ILIKE" + " '%" + query + "%' \n";
             } else if (by.contains("director")) {
-                queryForDb += "AND d.name LIKE" + " '%" + query + "%' \n";
+                queryForDb += "AND d.name ILIKE" + " '%" + query + "%' \n";
             } else if (by.contains("title")) {
-                queryForDb += "AND f.name LIKE" + " '%" + query + "%' \n";
+                queryForDb += "AND f.name ILIKE" + " '%" + query + "%' \n";
             }
         }
         queryForDb += SEARCH_ORDER_BY_LIKES_SUBQUERY;

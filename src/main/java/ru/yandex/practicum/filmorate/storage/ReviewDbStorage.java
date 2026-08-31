@@ -31,9 +31,7 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
     private static final String UPDATE_QUERY = """
                     UPDATE reviews
                     SET content = ?,
-                        is_positive = ?,
-                        user_id = ?,
-                        film_id = ?
+                        is_positive = ?
                     WHERE id = ?;
             """;
 
@@ -46,6 +44,7 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
     private static final String FIND_ALL_QUERY = """
                     SELECT *
                     FROM reviews
+                    ORDER BY useful DESC
                     LIMIT ?;
             """;
 
@@ -53,6 +52,7 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
                     SELECT *
                     FROM reviews
                     WHERE film_id = ?
+                    ORDER BY useful DESC
                     LIMIT ?;
             """;
 
@@ -118,8 +118,6 @@ public class ReviewDbStorage extends BaseRepository<Review> implements ReviewSto
         update(UPDATE_QUERY,
                 review.getContent(),
                 review.getIsPositive(),
-                review.getUserId(),
-                review.getFilmId(),
                 review.getReviewId());
         return review;
     }

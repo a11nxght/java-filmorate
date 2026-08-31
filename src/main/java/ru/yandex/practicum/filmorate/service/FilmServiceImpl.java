@@ -55,13 +55,17 @@ public class FilmServiceImpl implements FilmService {
         log.info("Start finding film with id: {}", id);
         Film film = filmStorage.findById(id).orElseThrow(() -> new NotFoundException("Фильм с таким id не найден."));
         setFilmGenres(film);
+        setFilmDirectors(film);
         return film;
     }
 
     @Override
     public List<Film> findAll() {
         log.info("Start finding all films");
-        return filmStorage.findAll().stream().peek(this::setFilmGenres).collect(Collectors.toList());
+        return filmStorage.findAll().stream()
+                .peek(this::setFilmGenres)
+                .peek(this::setFilmDirectors)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -96,28 +100,40 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> findPopular(int count) {
         log.info("Start getting popular films");
         return filmStorage.findPopular(count)
-                .stream().peek(this::setFilmGenres).collect(Collectors.toList());
+                .stream()
+                .peek(this::setFilmGenres)
+                .peek(this::setFilmDirectors)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Film> findPopularWithGenreAndYear(int count, long genreId, int year) {
         log.info("Start getting popular films with genre: {} and year: {}", genreId, year);
         return filmStorage.findPopularWithGenreAndYear(count, genreId, year)
-                .stream().peek(this::setFilmGenres).collect(Collectors.toList());
+                .stream()
+                .peek(this::setFilmGenres)
+                .peek(this::setFilmDirectors)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Film> findPopularWithGenre(int count, long genreId) {
         log.info("Start getting popular films with genre: {}", genreId);
         return filmStorage.findPopularWithGenre(count, genreId)
-                .stream().peek(this::setFilmGenres).collect(Collectors.toList());
+                .stream()
+                .peek(this::setFilmGenres)
+                .peek(this::setFilmDirectors)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Film> findPopularWithYear(int count, int year) {
         log.info("Start getting popular films with year: {}", year);
         return filmStorage.findPopularWithYear(count, year)
-                .stream().peek(this::setFilmGenres).collect(Collectors.toList());
+                .stream()
+                .peek(this::setFilmGenres)
+                .peek(this::setFilmDirectors)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -127,7 +143,11 @@ public class FilmServiceImpl implements FilmService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " - не найден."));
         userStorage.findById(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " - не найден."));
-        return filmStorage.findCommon(userId, friendId).stream().peek(this::setFilmGenres).collect(Collectors.toList());
+        return filmStorage.findCommon(userId, friendId)
+                .stream()
+                .peek(this::setFilmGenres)
+                .peek(this::setFilmDirectors)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -152,6 +172,14 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> searchFilms(String query, List<String> by) {
         log.info("Start search films with query: {}", query);
         return filmStorage.searchFilms(query, by).stream()
+                .peek(this::setFilmGenres)
+                .peek(this::setFilmDirectors)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Film> findRecommendations(long userId) {
+        return filmStorage.findRecommendations(userId).stream()
                 .peek(this::setFilmGenres)
                 .peek(this::setFilmDirectors)
                 .collect(Collectors.toList());
