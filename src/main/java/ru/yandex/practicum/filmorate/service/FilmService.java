@@ -19,5 +19,19 @@ public interface FilmService {
 
     void removeLike(long filmId, long userId);
 
-    List<Film> getPopular(int count);
+    List<Film> findPopular(int count);
+
+    List<Film> findPopularWithGenreAndYear(int count, long genreId, int year);
+
+    List<Film> findPopularWithGenre(int count, long genreId);
+
+    List<Film> findPopularWithYear(int count, int year);
+
+    List<Film> findCommonFilms(long userId, long friendId);
+
+    List<Film> findDirectorFilms(long directorId, List<String> sortBy);
+
+    List<Film> searchFilms(String query, List<String> by);
+
+    List<Film> findRecommendations(long userId);
 }

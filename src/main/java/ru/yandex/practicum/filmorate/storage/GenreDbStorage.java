@@ -29,6 +29,14 @@ public class GenreDbStorage extends BaseRepository<Genre> implements GenreStorag
             ORDER BY id;
             """;
 
+    private static final String FIND_BY_FILM_ID_QUERY = """
+            SELECT g.id AS id,
+                   g.name AS name
+            FROM film_genre AS fg
+            JOIN genres AS g ON fg.genre_id = g.id
+            WHERE fg.film_id = ?;
+            """;
+
     @Override
     public Optional<Genre> findById(long id) {
         log.info("making a request to find genre with id: {}", id);
@@ -39,5 +47,11 @@ public class GenreDbStorage extends BaseRepository<Genre> implements GenreStorag
     public List<Genre> findAll() {
         log.info("making a request to find all genres");
         return findMany(FIND_ALL_GENRES_QUERY);
+    }
+
+    @Override
+    public List<Genre> findFilmGenres(long filmId) {
+        log.info("making a request to find genre with filmId: {}", filmId);
+        return findMany(FIND_BY_FILM_ID_QUERY, filmId);
     }
 }

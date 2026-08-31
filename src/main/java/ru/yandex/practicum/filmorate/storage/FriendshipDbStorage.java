@@ -35,24 +35,27 @@ public class FriendshipDbStorage implements FriendshipStorage {
             """;
 
     @Override
-    public void addFriend(long userId, long friendId) {
+    public boolean addFriend(long userId, long friendId) {
         log.info("making a request to add a friendship");
         Integer isFriendAddUser = jdbcTemplate.queryForObject(SELECT_STATUS_QUERY, Integer.class,
                 friendId, userId);
+        int rowsUpdated;
         if (isFriendAddUser != null && isFriendAddUser > 0) {
-            jdbcTemplate.update(INSERT_QUERY, userId, friendId, true);
-
+            rowsUpdated = jdbcTemplate.update(INSERT_QUERY, userId, friendId, true);
             updateFriendshipStatus(true, friendId, userId);
         } else {
-            jdbcTemplate.update(INSERT_QUERY, userId, friendId, false);
+            rowsUpdated = jdbcTemplate.update(INSERT_QUERY, userId, friendId, false);
         }
+        return rowsUpdated > 0;
     }
 
     @Override
-    public void removeFriend(long userId, long friendId) {
+    public boolean removeFriend(long userId, long friendId) {
         log.info("making a request to remove a friendship");
-        jdbcTemplate.update(DELETE_FRIENDSHIP_QUERY, userId, friendId);
+        int rowsUpdated;
+        rowsUpdated = jdbcTemplate.update(DELETE_FRIENDSHIP_QUERY, userId, friendId);
         updateFriendshipStatus(false, friendId, userId);
+        return  rowsUpdated > 0;
     }
 
     public void updateFriendshipStatus(Boolean status, long userId, long friendId) {

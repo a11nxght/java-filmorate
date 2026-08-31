@@ -88,7 +88,7 @@ public class UserDbStorage extends BaseRepository<User> implements UserStorage {
 
     @Override
     public Optional<User> findById(long id) {
-        log.info("making a request to find user by id");
+        log.info("making a request to find user with id {}", id);
         return findOne(FIND_BY_ID_QUERY, id);
     }
 

@@ -28,4 +28,9 @@ public class GenreServiceImpl implements GenreService {
         log.info("Fetching all genres");
         return genreStorage.findAll();
     }
+
+    @Override
+    public List<Genre> findFilmGenres(long filmId) {
+        return genreStorage.findFilmGenres(filmId);
+    }
 }

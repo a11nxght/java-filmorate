@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event_feed.Event;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
@@ -67,5 +69,30 @@ public class UserController {
         List<User> result = userService.findCommonFriends(id, otherId);
         log.info("Common friends found for user(id:{})", id);
         return result;
+    }
+
+    @DeleteMapping("{userId}")
+    public void deleteUser(@PathVariable long userId) {
+        log.info("Deleting user {}", userId);
+        userService.delete(userId);
+        log.info("User deleted");
+    }
+
+    @GetMapping("{userId}")
+    public User getUser(@PathVariable long userId) {
+        log.info("Getting user {}", userId);
+        return userService.findById(userId);
+    }
+
+    @GetMapping("{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable long id) {
+        log.info("Getting recommendations for user {}", id);
+        return userService.findRecommendations(id);
+    }
+
+    @GetMapping("{id}/feed")
+    public List<Event> getEvents(@PathVariable long id) {
+        log.info("Getting events for user {}", id);
+        return userService.findEvents(id);
     }
 }

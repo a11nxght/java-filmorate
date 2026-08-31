@@ -1,12 +1,17 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.event_feed.Event;
+import ru.yandex.practicum.filmorate.model.event_feed.EventType;
+import ru.yandex.practicum.filmorate.model.event_feed.Operation;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 import ru.yandex.practicum.filmorate.storage.FriendshipStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -14,16 +19,13 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserStorage userStorage;
     private final FriendshipStorage friendshipStorage;
-
-    public UserServiceImpl(@Qualifier("UserDbStorage") UserStorage userStorage,
-                           FriendshipStorage friendshipStorage) {
-        this.userStorage = userStorage;
-        this.friendshipStorage = friendshipStorage;
-    }
+    private final EventStorage eventStorage;
+    private final FilmService filmService;
 
     @Override
     public User add(User user) {
@@ -73,7 +75,15 @@ public class UserServiceImpl implements UserService {
         userStorage.findById(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " не найден."));
 
-        friendshipStorage.addFriend(userId, friendId);
+        boolean isAdded = friendshipStorage.addFriend(userId, friendId);
+        if (isAdded) {
+            eventStorage.addEvent(Event.builder()
+                    .userId(userId)
+                    .eventType(EventType.FRIEND)
+                    .operation(Operation.ADD)
+                    .entityId(friendId)
+                    .build());
+        }
     }
 
     @Override
@@ -83,7 +93,15 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
         userStorage.findById(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " не найден."));
-        friendshipStorage.removeFriend(userId, friendId);
+        boolean isDeleted = friendshipStorage.removeFriend(userId, friendId);
+        if (isDeleted) {
+            eventStorage.addEvent(Event.builder()
+                    .userId(userId)
+                    .eventType(EventType.FRIEND)
+                    .operation(Operation.REMOVE)
+                    .entityId(friendId)
+                    .build());
+        }
     }
 
     @Override
@@ -102,5 +120,21 @@ public class UserServiceImpl implements UserService {
         userStorage.findById(friendId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id: " + friendId + " не найден."));
         return userStorage.findCommonFriends(userId, friendId);
+    }
+
+    @Override
+    public List<Film> findRecommendations(long userId) {
+        log.info("Start finding recommendations for user {}", userId);
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
+        return filmService.findRecommendations(userId);
+    }
+
+    @Override
+    public List<Event> findEvents(long userId) {
+        log.info("Start finding events for user {}", userId);
+        userStorage.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id: " + userId + " не найден."));
+        return eventStorage.findUserEvents(userId);
     }
 }
